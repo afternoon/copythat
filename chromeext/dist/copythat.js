@@ -1,74 +1,144 @@
-var iconOff = "icons/off48.png",
-  iconOn = "icons/on48.png";
+(function () {
+  var userId;
 
-var token;
+  var iconOff = 'icons/off38.png',
+    iconOn = 'icons/on38.png';
 
-var editing = false;
+  var editing = false;
 
-var currentHTML;
+  var currentHTML;
 
-var storeCurrentHTML = function () {
-  currentHTML = "TODO";
-};
+  var getActiveTabHTML = function (callback) {
+    chrome.tabs.executeScript(
+      {code: 'document.documentElement.innerHTML;'},
+      function (results) { callback(results[0]); }
+    );
+  };
 
-var toggleContentEditable = function (editable) {
-  var contentEditable = editable ? "true" : "inherit";
-  chrome.tabs.executeScript({
-    code: 'document.documentElement.contentEditable = "' + contentEditable + '";'
-  });
-};
+  var storeActiveTabHTML = function (callback) {
+    getActiveTabHTML(function (html) {
+      currentHTML = html;
+      callback();
+    });
+  };
 
-var enablePageEditing = function () { toggleContentEditable(true); };
-var disablePageEditing = function () { toggleContentEditable(false); };
+  var toggleContentEditable = function (editable, callback) {
+    var contentEditable = editable ? 'true' : 'inherit';
+    chrome.tabs.executeScript(
+      {code: 'document.documentElement.contentEditable = "' + contentEditable + '";'},
+      callback
+    );
+  };
 
-var showEditingIcon = function () {
-  chrome.pageAction.setIcon({path: iconOn});
-};
-var restoreNormalIcon = function () {
-  chrome.pageAction.setIcon({path: iconOff});
-};
+  var enablePageEditing = function (callback) {
+    toggleContentEditable(true, callback);
+  };
 
-var startEditing = function () {
-  storeCurrentHTML();
-  enablePageEditing();
-  showEditingIcon();
-  editing = true;
-};
+  var disablePageEditing = function (callback) {
+    toggleContentEditable(false, callback);
+  };
 
-var savePageEdits = function () {
-  // save record: (user ID, old HTML, new HTML, datetime)
-};
+  var showEditingIcon = function () {
+    chrome.pageAction.setIcon({path: iconOn});
+  };
 
-var stopEditing = function () {
-  disablePageEditing();
-  restoreNormalIcon();
-  savePageEdits();
-  editing = false;
-};
+  var restoreNormalIcon = function () {
+    chrome.pageAction.setIcon({path: iconOff});
+  };
 
-var onPageActionClick = function(tab) {
-  if (editing) {
-    stopEditing();
-  }
-  else {
-    startEditing();
-  }
-};
+  var startEditing = function () {
+  console.log('startEditing');
+    storeActiveTabHTML(function () {
+      console.log('stored active tab HTML');
+      enablePageEditing(function () {
+        console.log('enabled page editing');
+        // showEditingIcon();
+        editing = true;
+        console.log('started editing');
+      });
+    });
+  };
 
-var setupPageAction = function () {
-  chrome.pageAction.onClicked.addListener(onPageActionClick);
-  chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    chrome.pageAction.show(tabs[0].id);
-  });
-  chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
-    if (change.status == "complete") {
-      chrome.pageAction.show(tabId);
+  var save = function (record, callback) {
+    console.log('save', record);
+    callback();
+  };
+
+  var savePageEdits = function (callback) {
+    getActiveTabHTML(function (html) {
+      var record = {
+        userId: userId,
+        oldHTML: currentHTML,
+        newHTML: html,
+        time: new Date()
+      };
+      save(record, callback);
+    })
+  };
+
+  var stopEditing = function () {
+    console.log('stopEditing');
+    disablePageEditing(function () {
+      console.log('disabled page editing');
+      savePageEdits(function () {
+        console.log('saved page edits');
+        // restoreNormalIcon();
+        editing = false;
+        console.log('finished editing');
+      });
+    });
+  };
+
+  var onPageActionClick = function(tab) {
+    if (editing) {
+      stopEditing();
     }
-  });
-}
+    else {
+      startEditing();
+    }
+  };
 
-chrome.identity.getAuthToken({interactive: true}, function (newToken) {
-  console.log('copythat oauth token', newToken);
-  token = newToken;
-  setupPageAction();
-});
+  var setupPageAction = function () {
+    chrome.pageAction.onClicked.addListener(onPageActionClick);
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      chrome.pageAction.show(tabs[0].id);
+    });
+    chrome.tabs.onUpdated.addListener(function(tabId, change, tab) {
+      if (change.status == 'complete') {
+        chrome.pageAction.show(tabId);
+      }
+    });
+  }
+
+  var newToken = function() {
+    // http://stackoverflow.com/q/23822170/26201
+    // E.g. 8 * 32 = 256 bits token
+    var randomPool = new Uint8Array(32);
+    crypto.getRandomValues(randomPool);
+    var hex = '';
+    for (var i = 0; i < randomPool.length; ++i) {
+      hex += randomPool[i].toString(16);
+    }
+    // E.g. db18458e2782b2b77e36769c569e263a53885a9944dd0a861e5064eac16f1a
+    return hex;
+  }
+
+  var doWithUserId = function (action) {
+    chrome.storage.sync.get('userId', function (data) {
+      userId = data.userId;
+      if (userId) {
+        console.log('found userId', userId);
+        action();
+      } else {
+        userId = newToken();
+        console.log('generated userId', userId);
+        chrome.storage.sync.set({userId: userId}, function() {
+          console.log('saved userId', userId);
+          action();
+        });
+      }
+    });
+  };
+
+  doWithUserId(setupPageAction);
+})();

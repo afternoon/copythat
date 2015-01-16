@@ -9,17 +9,8 @@
 
   "permissions": [
     "activeTab",
-    "identity",
-    "https://accounts.google.com/*",
-    "https://www.googleapis.com/*"
+    "storage"
   ],
-
-  "oauth2": {
-    "client_id": "528818435148-q5r9v0u9o77dmdngumes3cfkljj6v88m.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/plus.login"
-    ]
-  },
 
   "icons": {
     "48": "icons/off48.png",
@@ -27,7 +18,9 @@
   },
 
   "background": {
-    "scripts": ["copythat.js"],
+    "scripts": [
+      "copythat.js"
+    ],
     "persistent": false
   },
 
