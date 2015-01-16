@@ -1,0 +1,38 @@
+{
+  "manifest_version": 2,
+
+  "name": "CopyThat",
+  "description": "Request website copy changes from your tech team",
+  "version": "0.1.0",
+
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwuH/Ejm/BIkwxfht+VYQeunl600NMhjXdvr0O9q1gpmkKQw0zt4NfmSIVIIFMrmAY4bQsFL6cfPhEvOUnFPih+edo0vA1qlfRl0+VRoRmim0l6phpSJYKgZWcYv7IFREJQxaBqgQu6A/hGEL0DyArYRPR5JnCFNYWfLteYC3AWTFf5dIK6DvGUqiJ3rUM96NjHaGq+nOg8lkXDgUuGhu8PRxJq5mIzUXVvXTz2h+iahUVVaOl3K64Z656JXAjsCU+eZNunqOMJcqnZMmDVM3bZxQSI3lK9SB7Krid0P/2O3tZIMlwBlF1j34HAV0ajqTq1+gAtOyW0yfGDYi0ojK5wIDAQAB",
+
+  "permissions": [
+    "activeTab",
+    "identity",
+    "https://accounts.google.com/*",
+    "https://www.googleapis.com/*"
+  ],
+
+  "oauth2": {
+    "client_id": "528818435148-q5r9v0u9o77dmdngumes3cfkljj6v88m.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/plus.login"
+    ]
+  },
+
+  "icons": {
+    "48": "icons/off48.png",
+    "128": "icons/off128.png"
+  },
+
+  "background": {
+    "scripts": ["copythat.js"],
+    "persistent": false
+  },
+
+  "page_action": {
+    "default_title": "Suggest copy changes",
+    "default_icon": "icons/off38.png"
+  }
+}
