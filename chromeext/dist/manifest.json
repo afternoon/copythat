@@ -12,6 +12,8 @@
     "storage"
   ],
 
+  "content_security_policy": "script-src 'self' https://cdn.firebase.com https://*.firebaseio.com; object-src 'self'",
+
   "icons": {
     "48": "icons/off48.png",
     "128": "icons/off128.png"
@@ -19,6 +21,7 @@
 
   "background": {
     "scripts": [
+      "firebase-2.1.1.js",
       "copythat.js"
     ],
     "persistent": false

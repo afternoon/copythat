@@ -1,4 +1,8 @@
 (function () {
+  Firebase.enableLogging(true);
+
+  var firebase = new Firebase('https://copythat.firebaseio.com/');
+
   var userId;
 
   var iconOff = 'icons/off38.png',
